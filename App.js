@@ -1,21 +1,22 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
+import LoginScreen from './screens/LoginScreen';
+import Dashboard from './screens/Dashboard';
+import VotingScreen from './screens/VotingScreen'
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+const navigator = createStackNavigator(
+  {
+    Login: LoginScreen,
+    MemberDashboard: Dashboard,
+    Vote: VotingScreen
+  }, 
+  {
+  initialRouteName: 'Login',
+  defaultNavigationOptions:{
+    title:'Election Application',
+    header: null,
+    headerLeft: null
+  }
 });
+
+export default createAppContainer(navigator);
