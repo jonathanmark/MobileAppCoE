@@ -7,7 +7,6 @@ const Dashboard = ({navigation}) => {
     const member = navigation.getParam('memberDetails');
     const membersArray = navigation.getParam('members');
 
-    console.log(member.has_voted);
     return(
         <View>
             <View style={styles.titleContainer}>
@@ -30,7 +29,7 @@ const Dashboard = ({navigation}) => {
                         <Text style={styles.buttonLabel}>Vote Now!</Text>
                     </View>
                     
-                    <TouchableOpacity onPress={()=> navigation.navigate('Vote', {id: member.id, membersArray: membersArray})}>
+                    <TouchableOpacity onPress={()=> navigation.navigate('Vote', {id: member.id, membersArray: membersArray, memberDetails: member})}>
                         <View style={styles.voteButton}>
                             <MaterialCommunityIcons name="vote-outline" size={24} color="white"/>    
                         </View>

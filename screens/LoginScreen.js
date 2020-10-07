@@ -8,65 +8,55 @@ const LoginScreen = ({navigation}) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
-    
 
     const checkCredentials = () =>{
 
         const noUsernameMatch = true;
-        console.log('1');
         for(i=0;i < members.length; i++){
-
             if(members[i].email === username){
                 const memberNumber = i;
-                console.log('2');
                 if(members[memberNumber].password === password){
-                    console.log('3');
                     usernameMatch = false;
                     navigation.navigate("MemberDashboard", {memberDetails: members[memberNumber], members: members});
                     break;
                 }else{
-                    console.log('4');
                     usernameMatch = true;
                     wrongPasswordAlert();
                     break;
                 }
-
             }
 
             if(members.length - 1 === i && noUsernameMatch){
-                console.log('5');
                 noSuchAccount();
                 break;
             }
-
         }
     }
 
     const wrongPasswordAlert = () =>
-    Alert.alert(
-      "Incorrect password",
-      "Please input password again",
-      [
-        { text: "Close", onPress: () => console.log("OK Pressed") }
-      ],
-      { cancelable: false }
-    );
+        Alert.alert(
+        "Incorrect password",
+        "Please input password again",
+        [
+            { text: "Close", onPress: () => console.log("OK Pressed") }
+        ],
+        { cancelable: false }
+        );
 
     const noSuchAccount = () =>
-    Alert.alert(
-      "No account associated with e-mail",
-      "Please check e-mail spelling. If you have no account yet, contact JPCS secretary",
-      [
-        { text: "Close", onPress: () => console.log("OK Pressed") }
-      ],
-      { cancelable: false }
-    );
+        Alert.alert(
+        "No account associated with e-mail",
+        "Please check e-mail spelling. If you have no account yet, contact JPCS secretary",
+        [
+            { text: "Close", onPress: () => console.log("OK Pressed") }
+        ],
+        { cancelable: false }
+        );
 
     const getMembersFromApi = () => {
         return fetch('https://jpcs.herokuapp.com/api/members/')
           .then((response) => response.json())
           .then((json) => {
-            console.log(json);
             setMembers(json);
             return json;
           })
