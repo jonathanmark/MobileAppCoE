@@ -1,26 +1,59 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, BackHandler, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import CandidatesOfIndividualPositions from '../components/CandidatesOfIndividualPositions';
 
 const VotingScreen = ({navigation}) => {
     
-    const [positions, setPositions] = useState();
-    const [header, setHeader] = useState('Ballot Penoy');
-    const [votes, setVotes] = useState([]);
     const membersArray = navigation.getParam('membersArray');
     const memberID = navigation.getParam('id');
     const memberObject = navigation.getParam('memberDetails');
+
+    const [positions, setPositions] = useState();
+    const [header, setHeader] = useState('Ballot');
+    const [votes, setVotes] = useState([]);
 
     useEffect(() => {
         getPositionsFromApi();
     }, []);
 
     const consoleLogVotes = () => {
-      console.log("New Call:")
-      console.log(votes);
+      Alert.alert(
+        "Submit Votes?",
+        "Votes cannot be changed after submitting",
+        [
+            { text: "Submit", onPress: () => finalizeAndSubmit()}
+        ],
+        { cancelable: true }
+        );
     }
 
-    const sendData = () => {
+    const finalizeAndSubmit = () => {
+      modifyUser();
+      //Recall user api to recognize vote:
+      navigation.navigate("MemberDashboard", {memberDetails: membersArray[memberID], members: membersArray});
+    }
+
+    const convertToString = (object) => {
+      return JSON.stringify(object)
+    }
+
+    const modifyUser = () => {
+
+      fetch('https://jpcs.herokuapp.com/api/votes/', {
+        method: 'post',
+        mode:'no-cors',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+                     voter_name: memberObject.last_name, 
+              voter_student_num: memberObject.student_number, 
+                          votes: JSON.stringify(votes),
+                  ballot_number: memberObject.ballot_number
+        })
+      });
+
       fetch(`https://jpcs.herokuapp.com/api/members/${memberID}/`, {
         method: 'PUT',
         headers: {
@@ -55,31 +88,39 @@ const VotingScreen = ({navigation}) => {
       };
 
     const handleName = theName => {
-
-      if(votes.length === 0){        
+      
+      if(votes.length === 0){    
         setVotes([...votes, {
           id:votes.length,
           position:theName.position,
-          id_number:theName.id_number
+          id_number:theName.id_number,
+          last_name_of_candidate : theName.last_name_of_candidate
           }]); 
       }else{
+        var noPositionMatch = true;
         for(i=0; i < votes.length; i++){
           if(votes[i].position === theName.position){
-            const newVoteArray = [...votes]
-            newVoteArray[i] = {
+
+              const newVoteArray = [...votes]
+              newVoteArray[i] = {
+                id:votes.length,
+                position:theName.position,
+                id_number:theName.id_number,
+                last_name_of_candidate : theName.last_name_of_candidate};
+              setVotes(newVoteArray);
+              noPositionMatch = false;
+              break;
+            }
+          if(votes.length - 1 === i && noPositionMatch){
+            setVotes([...votes, {
               id:votes.length,
               position:theName.position,
-              id_number:theName.id_number
-            }
-            setVotes(newVoteArray);
-          }
-        }
+              id_number:theName.id_number,
+              last_name_of_candidate : theName.last_name_of_candidate
+              }]); 
+          }}}
       }
-
-      console.log(votes);
-      
-    }
-
+    
       return(
           <View style={styles.containerMargin}>
             <View style={styles.header}>
@@ -90,13 +131,14 @@ const VotingScreen = ({navigation}) => {
             <View style={{flex:1}}>
               <FlatList
                   data={positions}
-                  keyExtractor={( item ) => item.position}
+                  keyExtractor={( item ) => item.position.toString()}
                   renderItem={({ item }) => (
                     <View>
                       <CandidatesOfIndividualPositions 
                         position={item.position} 
                         membersList={membersArray}
                         getVote={handleName}
+                        votesArray={votes}
                         />
                     </View>)}
                     />

@@ -1,14 +1,57 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState,useEffect} from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import {Text, View, StyleSheet, TextInput, TouchableOpacity, Alert} from 'react-native';
+import ElectionResults from '../components/ElectionResults';
 
 const Dashboard = ({navigation}) => {
+
+    const [votes, setVotes] = useState([]);
+    const [user, setUser] = useState();
+    const [hasLoaded, setHasLoaded] =useState(false);
 
     const member = navigation.getParam('memberDetails');
     const membersArray = navigation.getParam('members');
 
+    function getUpdatedMemberDetails (memberID) {
+        console.log("getUpdated" + memberID);
+        return fetch(`https://jpcs.herokuapp.com/api/members/${memberID}/`)
+        .then((response) => response.json())
+          .then((json) => {
+            setUser(json);
+            return json;
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+    }
+
+    const getVotesFromApi = () => {
+        return fetch('https://jpcs.herokuapp.com/api/votes/')
+          .then((response) => response.json())
+          .then((json) => {
+            setVotes(json);
+            return json;
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      };
+
+    async function setter(userNum){
+        const updatedMember = await getUpdatedMemberDetails(userNum);
+        await getVotesFromApi();
+        setHasLoaded(true);
+        console.log(hasLoaded);
+    }
+    
+    useEffect(() => {
+        setter(member.id);
+    }, []);
+
+    const numberOfVotes = votes.length;
+
     return(
-        <View>
+        <View style={{flex:1}}>
             <View style={styles.titleContainer}>
                 <View style={styles.titleHeader}>
                     <Text style={styles.nameText}>{member.first_name} {member.middle_initial} {member.last_name}</Text>
@@ -16,25 +59,30 @@ const Dashboard = ({navigation}) => {
                     <Text style={styles.whiteText}>{member.student_number}</Text>
                 </View>
             </View>
+            <View style={{flex:1}}>
             {member.has_voted ? 
                 <View style={styles.messageHolder}>
-                    <Text style={styles.message} >You have already voted. View your votes? Click on the icon below</Text>
+                    <Text style={styles.message} >You have already voted.</Text>
+                    <Text style={styles.message} >Updated Results</Text>
+                    <View style={styles.electionHolder}>
+                        <ElectionResults/>
+                    </View>
                 </View> :
                 <View>
                     <View style={styles.messageHolder}>
                         <Text style={styles.message}>You haven't voted yet. Click the Vote Button to vote now!</Text>
-                        <Text style={styles.message}>There are already 69 JPCS members who voted already!</Text>
+                        <Text style={styles.message}>There are already {numberOfVotes} JPCS members who voted already!</Text>
                     </View>
                     <View style={styles.centerAlign}>
                         <Text style={styles.buttonLabel}>Vote Now!</Text>
                     </View>
-                    
                     <TouchableOpacity onPress={()=> navigation.navigate('Vote', {id: member.id, membersArray: membersArray, memberDetails: member})}>
                         <View style={styles.voteButton}>
                             <MaterialCommunityIcons name="vote-outline" size={24} color="white"/>    
                         </View>
                     </TouchableOpacity>
                 </View>}
+            </View>
         </View>
     )
 }
@@ -52,7 +100,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     messageHolder:{
-        marginVertical:50
+        flex:1,
+        marginVertical:1
     },
     nameText:{
         fontSize:25,
@@ -65,7 +114,9 @@ const styles = StyleSheet.create({
     },
     message:{
         marginHorizontal:30,
-        textDecorationLine: 'underline'
+        marginVertical:35,
+        textDecorationLine: 'underline',
+        alignItems:'center'
     },
     voteButton:{
         marginTop:10,
@@ -84,7 +135,12 @@ const styles = StyleSheet.create({
         textDecorationLine:'underline'
     },
     centerAlign:{
+        marginTop:200,
         alignItems:'center'
+    },
+    electionHolder:{
+        flex:1,
+        margin:10
     }
 });
 

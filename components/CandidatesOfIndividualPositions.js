@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import CheckBox from '@react-native-community/checkbox';
 
-const CandidatesOfIndividualPositions = ({ position, membersList, getVote }) => {
+
+const CandidatesOfIndividualPositions = ({ position, membersList, getVote, votesArray }) => {
 
     const scalper = (pos123, position1) => {
         const candidates = [];
-
         for (i = 0; i < pos123.length; i++) {
             if (pos123[i].asipiring_position === position1) {
                 candidates.push(pos123[i]);
@@ -16,15 +17,18 @@ const CandidatesOfIndividualPositions = ({ position, membersList, getVote }) => 
 
     const data = scalper(membersList, position);
 
-    const voteToReturn = (position, idNumber) => {
+    const voteToReturn = (position, idNumber, last_name_of_candidate) => {
 
         var voteToRet = {
+            'last_name_of_candidate' : last_name_of_candidate,
             'position': position,
             'id_number': idNumber
         }
-
         return voteToRet;
+    }
 
+    const checkBoxAndVotes = (position, idNumber, vote_lastName) => {
+        getVote(voteToReturn(position, idNumber, vote_lastName));
     }
 
     return (
@@ -35,15 +39,16 @@ const CandidatesOfIndividualPositions = ({ position, membersList, getVote }) => 
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        onPress={() => getVote(voteToReturn(item.asipiring_position, item.id))}>
+                        onPress={() => checkBoxAndVotes(item.asipiring_position, item.id, item.last_name)}>
                         <View style={styles.candidateBox}>
-                            <Text style={styles.candidateText}>{item.last_name}, {item.first_name}</Text>
+                        <Text style={styles.candidateText}>{item.last_name}, {item.first_name} {item.middle_initial}</Text>
+                            <CheckBox
+                                disabled={false}
+                                value={false}
+                            />
                         </View>
-                    </TouchableOpacity>
-                )}
-            />
+                    </TouchableOpacity>)}/>
         </View>
-
     )
 };
 
@@ -69,7 +74,9 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
         marginVertical: 5,
         borderWidth: 1,
-        borderRadius: 5
+        borderRadius: 5,
+        flexDirection:'row',
+        justifyContent:'space-between'
     }
 });
 

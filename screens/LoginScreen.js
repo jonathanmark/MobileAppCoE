@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import {Text, View, StyleSheet, TextInput, TouchableOpacity, Alert} from 'react-native';
+import {Text, View, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert} from 'react-native';
 import { AntDesign } from '@expo/vector-icons'; 
 
 const LoginScreen = ({navigation}) => {
 
+    const [hasLoaded, setHasLoaded] = useState(false);
     const [members,setMembers] = useState();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -65,39 +66,54 @@ const LoginScreen = ({navigation}) => {
           });
       };
 
+    async function setter(){
+        const membersArray = await getMembersFromApi();
+        setMembers(membersArray);
+        setHasLoaded(true);
+    }
+
 
     useEffect(() => {
-         setMembers(getMembersFromApi());
+         setter();
     }, []);  
 
 
     return(
         <View >
-            <Text style={styles.textTitle}>Welcome to the JPCS Voting Application</Text>
-            <View style={styles.backgroundStyle}>
-                <AntDesign  style={styles.iconStyle} name="user" size={24} color="black" />
-                <TextInput
-                    placeholder="e-mail"
-                    autoCapitalize='none'
-                    onChangeText={(newValue) => {setUsername(newValue)}}
-                />
-            </View>
-            <View style={styles.backgroundStyle}>
-                <AntDesign style={styles.iconStyle} name="key" size={24} color="black" />
-                <TextInput
-                    placeholder="password"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry={true}
-                    onChangeText={(newValue) => {setPassword(newValue)}}
-                />
-            </View>
-            <TouchableOpacity onPress={()=>{checkCredentials()}} >
-                <View style={styles.loginButton}>
-                    <Text style={styles.textLogin}>Login</Text>
-                </View>
-            </TouchableOpacity>
-            <Text style={styles.noAccountNotif}>No account yet? Contact JPCS Mapua Secretary.</Text>
+            {hasLoaded ?
+                <View>        
+                    <Text style={styles.textTitle}>Welcome to the JPCS Voting Application</Text>
+                    <View style={styles.backgroundStyle}>
+                        <AntDesign  style={styles.iconStyle} name="user" size={24} color="black" />
+                        <TextInput
+                            placeholder="e-mail"
+                            autoCapitalize='none'
+                            onChangeText={(newValue) => {setUsername(newValue)}}
+                        />
+                    </View>
+                    <View style={styles.backgroundStyle}>
+                        <AntDesign style={styles.iconStyle} name="key" size={24} color="black" />
+                        <TextInput
+                            placeholder="password"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            secureTextEntry={true}
+                            onChangeText={(newValue) => {setPassword(newValue)}}
+                        />
+                    </View>
+                    <TouchableOpacity onPress={()=>{checkCredentials()}} >
+                        <View style={styles.loginButton}>
+                            <Text style={styles.textLogin}>Login</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <Text style={styles.noAccountNotif}>No account yet? Contact JPCS Mapua Secretary.</Text>
+                </View> 
+            : 
+                <View style={[styles.container, styles.horizontal]}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                </View> 
+            }
+            
         </View>
     );
 };
@@ -145,6 +161,16 @@ const styles = StyleSheet.create({
         marginTop:10,
         marginHorizontal: 25,
         textDecorationLine: 'underline',
+    },
+    container:{
+        marginTop:200,
+        justifyContent: 'center', //Centered vertically
+        alignItems: 'center', // Centered horizontally
+    },
+    horizontal:{
+        flexDirection: "row",
+        justifyContent: "space-around",
+        padding: 10
     }
 });
 

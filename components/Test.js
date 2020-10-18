@@ -1,67 +1,115 @@
-import React, { useState } from "react";
-import { FlatList, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity } from "react-native";
+import React, {useState,useEffect} from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import {Text, View, StyleSheet, TextInput, TouchableOpacity, Alert} from 'react-native';
+import ElectionResults from '../components/ElectionResults';
 
-const DATA = [
-  {
-    id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-    title: "First Item",
-  },
-  {
-    id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-    title: "Second Item",
-  },
-  {
-    id: "58694a0f-3da1-471f-bd96-145571e29d72",
-    title: "Third Item",
-  },
-];
+const Dashboard = ({navigation}) => {
 
-const Item = ({ item, onPress, style }) => (
-  <TouchableOpacity onPress={onPress} style={[styles.item, style]}>
-    <Text style={styles.title}>{item.title}</Text>
-  </TouchableOpacity>
-);
+    const member = navigation.getParam('memberDetails');
+    const membersArray = navigation.getParam('members');
 
-const App = () => {
-  const [selectedId, setSelectedId] = useState(null);
+    const [updatedMember, setUpdatedMemeber] = useState({});
+    const [hasLoaded, setHasLoaded] = useState(false);
 
-  const renderItem = ({ item }) => {
-    const backgroundColor = item.id === selectedId ? "#6e3b6e" : "#f9c2ff";
+    
 
-    return (
-      <Item
-        item={item}
-        onPress={() => setSelectedId(item.id)}
-        style={{ backgroundColor }}
-      />
-    );
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={DATA}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        extraData={selectedId}
-      />
-    </SafeAreaView>
-  );
-};
+    return(
+        <View>
+            {hasLoaded ? 
+                <View style={{flex:1}}>
+                <View style={styles.titleContainer}>
+                    <View style={styles.titleHeader}>
+                        <Text style={styles.nameText}>{user.first_name} {user.middle_initial} {user.last_name}</Text>
+                        <Text style={styles.whiteText}>{user.email}</Text>
+                        <Text style={styles.whiteText}>{user.student_number}</Text>
+                    </View>
+                </View>
+                {user.has_voted ? 
+                    <View style={styles.messageHolder}>
+                        <Text style={styles.message} >You have already voted.</Text>
+                        <View style={styles.electionHolder}>
+                            <ElectionResults/>
+                        </View>
+                    </View> :
+                    <View>
+                        <View style={styles.messageHolder}>
+                            <Text style={styles.message}>You haven't voted yet. Click the Vote Button to vote now!</Text>
+                            <Text style={styles.message}>There are already {numberOfVotes} JPCS members who voted already!</Text>
+                        </View>
+                        <View style={styles.centerAlign}>
+                            <Text style={styles.buttonLabel}>Vote Now!</Text>
+                        </View>
+                        
+                        <TouchableOpacity onPress={()=> navigation.navigate('Vote', {id: member.id, membersArray: membersArray, memberDetails: member})}>
+                            <View style={styles.voteButton}>
+                                <MaterialCommunityIcons name="vote-outline" size={24} color="white"/>    
+                            </View>
+                        </TouchableOpacity>
+                    </View>}
+                </View>
+                :
+                null    
+            }
+            
+        </View>
+    )
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: StatusBar.currentHeight || 0,
-  },
-  item: {
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-  },
-  title: {
-    fontSize: 32,
-  },
+    titleContainer:{
+        backgroundColor:'blue',
+        borderBottomLeftRadius:10,
+        borderBottomRightRadius:10
+    },
+    titleHeader:{
+        marginHorizontal:30,
+        marginTop:100,
+        marginBottom:70,
+        fontWeight: 'bold',
+    },
+    messageHolder:{
+        flex:1,
+        marginVertical:1
+    },
+    nameText:{
+        fontSize:25,
+        color:'white',
+        marginBottom: 5
+    },
+    whiteText:{
+        color:'white',
+        textDecorationLine: 'underline'
+    },
+    message:{
+        marginHorizontal:30,
+        marginVertical:35,
+        textDecorationLine: 'underline',
+        alignItems:'center'
+    },
+    voteButton:{
+        marginTop:10,
+        alignItems:'center',
+        justifyContent:'center',
+        height: 50,
+        borderRadius:40,
+        marginHorizontal:25,
+        backgroundColor:'blue',
+        marginBottom:10
+    },
+    buttonLabel:{
+        
+        fontWeight:'bold',
+        color:'blue',
+        textDecorationLine:'underline'
+    },
+    centerAlign:{
+        marginTop:200,
+        alignItems:'center'
+    },
+    electionHolder:{
+        flex:1,
+        margin:10
+    }
 });
 
-export default App;
+export default Dashboard;
