@@ -12,6 +12,8 @@ const Dashboard = ({navigation}) => {
     const member = navigation.getParam('memberDetails');
     const membersArray = navigation.getParam('members');
 
+    
+
     function getUpdatedMemberDetails (memberID) {
         console.log("getUpdated" + memberID);
         return fetch(`https://jpcs.herokuapp.com/api/members/${memberID}/`)

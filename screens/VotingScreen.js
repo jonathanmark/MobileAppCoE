@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, BackHandler } from 'react-native';
 import CandidatesOfIndividualPositions from '../components/CandidatesOfIndividualPositions';
 
 const VotingScreen = ({navigation}) => {
@@ -17,19 +17,23 @@ const VotingScreen = ({navigation}) => {
     }, []);
 
     const consoleLogVotes = () => {
+      
       Alert.alert(
         "Submit Votes?",
-        "Votes cannot be changed after submitting",
+        "your votes" + "Votes cannot be changed after submitting",
         [
-            { text: "Submit", onPress: () => finalizeAndSubmit()}
+            { text: "Submit and Exit", onPress: () => finalizeAndSubmit()}
         ],
         { cancelable: true }
         );
     }
 
-    const finalizeAndSubmit = () => {
-      modifyUser();
-      //Recall user api to recognize vote:
+    //member details should be re-rendered after voting
+    //navigation.navigate("MemberDashboard", {memberDetails: members[memberNumber], members: members});
+
+    async function finalizeAndSubmit (){
+      await modifyUser();
+      BackHandler.exitApp();
       navigation.navigate("MemberDashboard", {memberDetails: membersArray[memberID], members: membersArray});
     }
 
@@ -37,9 +41,9 @@ const VotingScreen = ({navigation}) => {
       return JSON.stringify(object)
     }
 
-    const modifyUser = () => {
+    async function modifyUser (){
 
-      fetch('https://jpcs.herokuapp.com/api/votes/', {
+      await fetch('https://jpcs.herokuapp.com/api/votes/', {
         method: 'post',
         mode:'no-cors',
         headers: {
@@ -127,6 +131,7 @@ const VotingScreen = ({navigation}) => {
               <Text style={styles.headerText}>
                 {header}
               </Text>
+              <Text>Click on your chosen candidates</Text>
             </View>
             <View style={{flex:1}}>
               <FlatList

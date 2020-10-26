@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, FlatList , Alert} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 
 
 const CandidatesOfIndividualPositions = ({ position, membersList, getVote, votesArray }) => {
+
 
     const scalper = (pos123, position1) => {
         const candidates = [];
@@ -29,6 +30,14 @@ const CandidatesOfIndividualPositions = ({ position, membersList, getVote, votes
 
     const checkBoxAndVotes = (position, idNumber, vote_lastName) => {
         getVote(voteToReturn(position, idNumber, vote_lastName));
+        Alert.alert(
+            "Selection Registered!",
+            "You have selected " + vote_lastName + " as your " + position + ". You may change your vote by selecting another candidate. Please continue your selection of other candidates for other positions or if you are finished, click Finalize Votes.",
+            [
+                { text: "Close", onPress: () => console.log("OK Pressed") }
+            ],
+            { cancelable: false }
+            );
     }
 
     return (
@@ -42,10 +51,6 @@ const CandidatesOfIndividualPositions = ({ position, membersList, getVote, votes
                         onPress={() => checkBoxAndVotes(item.asipiring_position, item.id, item.last_name)}>
                         <View style={styles.candidateBox}>
                         <Text style={styles.candidateText}>{item.last_name}, {item.first_name} {item.middle_initial}</Text>
-                            <CheckBox
-                                disabled={false}
-                                value={false}
-                            />
                         </View>
                     </TouchableOpacity>)}/>
         </View>
